@@ -4,7 +4,7 @@
   "description": "Compile multistage Meteor Dockerfile",
   "main": "lib/index.js",
   "scripts": {
-    "build": "tsc && ncc build"
+    "build": "tsc && ncc build --source-map"
   },
   "dependencies": {
     "@actions/core": "^1.1.0",

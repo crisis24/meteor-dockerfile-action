@@ -15,7 +15,7 @@ try {
     }
     const releaseFile_ = '' + fs.readFileSync(releaseFile);
     const m = releaseFile_.match(/^METEOR@([\d\.]+)/);
-    release = m && m[1];
+    if (m && m[1]) release = m && m[1];
   }
 
   const METEOR_VERSION = release;

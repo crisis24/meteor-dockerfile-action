@@ -1,4 +1,4 @@
-module.exports =
+require('./sourcemap-register.js');module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
@@ -21,12 +21,13 @@ try {
     if (!release) {
         const releaseFile = core_1.default.getInput('meteor-release-file');
         core_1.default.debug(`meteor-release-file: ${releaseFile}`);
-        if (!releaseFile)
+        if (!releaseFile) {
             throw new Error('Meteor version missing');
+        }
         const releaseFile_ = '' + fs_1.default.readFileSync(releaseFile);
-        const match = releaseFile_.match(/^METEOR@([\d\.]+)/);
-        if (match && match[1])
-            release = match[1];
+        const m = releaseFile_.match(/^METEOR@([\d\.]+)/);
+        if (m && m[1])
+            release = m && m[1];
     }
     const METEOR_VERSION = release;
     // https://github.com/disney/meteor-base/blob/master/test.sh#L59
@@ -513,3 +514,4 @@ module.exports = require("path");
 /******/ 	return __webpack_require__(822);
 /******/ })()
 ;
+//# sourceMappingURL=index.js.map

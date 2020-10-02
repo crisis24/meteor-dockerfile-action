@@ -1,0 +1,18 @@
+name: 'meteor-dockerfile'
+description: 'Generate multistage Meteor Dockerfile'
+inputs:
+  meteor-version:
+    description: 'Meteor Version'
+    required: false
+    default: ''
+  meteor-release-file:
+    description: 'Path to .meteor/release'
+    required: false
+    default: './.meteor/release'
+  docker-file:
+    description: 'Path to Dockerfile'
+    required: false
+    default: './Dockerfile'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

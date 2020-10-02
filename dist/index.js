@@ -7,24 +7,40 @@ require('./sourcemap-register.js');module.exports =
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __importDefault(__webpack_require__(186));
-const fs_1 = __importDefault(__webpack_require__(747));
+const core = __importStar(__webpack_require__(186));
+const fs = __importStar(__webpack_require__(747));
 try {
-    const dockerFile = core_1.default.getInput('docker-file');
-    core_1.default.debug(`docker-file: ${dockerFile}`);
-    let release = core_1.default.getInput('meteor-version');
-    core_1.default.debug(`meteor-version: ${release}`);
+    const dockerFile = core.getInput('docker-file');
+    core.debug(`docker-file: ${dockerFile}`);
+    let release = core.getInput('meteor-version');
+    core.debug(`meteor-version: ${release}`);
     if (!release) {
-        const releaseFile = core_1.default.getInput('meteor-release-file');
-        core_1.default.debug(`meteor-release-file: ${releaseFile}`);
+        const releaseFile = core.getInput('meteor-release-file');
+        core.debug(`meteor-release-file: ${releaseFile}`);
         if (!releaseFile) {
             throw new Error('Meteor version missing');
         }
-        const releaseFile_ = '' + fs_1.default.readFileSync(releaseFile);
+        const releaseFile_ = '' + fs.readFileSync(releaseFile);
         const m = releaseFile_.match(/^METEOR@([\d\.]+)/);
         if (m && m[1])
             release = m && m[1];
@@ -50,14 +66,14 @@ RUN bash $SCRIPTS_FOLDER/build-meteor-npm-dependencies.sh && apk del .node-gyp-c
 ENTRYPOINT ["/docker/entrypoint.sh"]
 CMD ["node", "main.js"]
 EXPOSE 3000`;
-    core_1.default.info(`METEOR_VERSION = ${METEOR_VERSION}`);
-    core_1.default.info(`NODE_VERSION = ${NODE_VERSION}`);
-    core_1.default.info(``);
-    core_1.default.info(TEMPLATE);
-    fs_1.default.writeFileSync(dockerFile, TEMPLATE);
+    core.info(`METEOR_VERSION = ${METEOR_VERSION}`);
+    core.info(`NODE_VERSION = ${NODE_VERSION}`);
+    core.info(``);
+    core.info(TEMPLATE);
+    fs.writeFileSync(dockerFile, TEMPLATE);
 }
 catch (error) {
-    core_1.default.setFailed(error.message);
+    core.setFailed(error.message);
 }
 //# sourceMappingURL=index.js.map
 

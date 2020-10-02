@@ -1,5 +1,5 @@
-import core from '@actions/core';
-import fs from 'fs';
+import * as core from '@actions/core';
+import * as fs from 'fs';
 
 try {
   const dockerFile = core.getInput('docker-file');

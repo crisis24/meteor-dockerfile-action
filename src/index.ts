@@ -28,6 +28,7 @@ try {
 
   const TEMPLATE = `FROM geoffreybooth/meteor-base:${METEOR_VERSION} as builder
 ARG NPM_PACKAGE_TOKEN
+ARG EXTRA_PACKAGES
 COPY ./package*.json ./.npmrc $APP_SOURCE_FOLDER/
 RUN echo "//npm.pkg.github.com/:_authToken=${NPM_PACKAGE_TOKEN}" > ~/.npmrc && bash $SCRIPTS_FOLDER/build-app-npm-dependencies.sh
 COPY . $APP_SOURCE_FOLDER/

@@ -28,13 +28,13 @@ try {
 
   const TEMPLATE = `FROM geoffreybooth/meteor-base:${METEOR_VERSION} as builder
 ARG NPM_PACKAGE_TOKEN
-ARG EXTRA_PACKAGES
 COPY ./package*.json ./.npmrc $APP_SOURCE_FOLDER/
 RUN echo "//npm.pkg.github.com/:_authToken=${NPM_PACKAGE_TOKEN}" > ~/.npmrc && bash $SCRIPTS_FOLDER/build-app-npm-dependencies.sh
 COPY . $APP_SOURCE_FOLDER/
 RUN bash $SCRIPTS_FOLDER/build-meteor-bundle.sh
 
 FROM node:${NODE_VERSION}-alpine
+ARG EXTRA_PACKAGES
 ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker
 RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make python && apk --no-cache add bash ca-certificates ${EXTRA_PACKAGES}

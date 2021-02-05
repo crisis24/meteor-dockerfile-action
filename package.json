@@ -1,6 +1,6 @@
 {
   "name": "meteor-dockerfile",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Compile multistage Meteor Dockerfile",
   "main": "lib/index.js",
   "scripts": {

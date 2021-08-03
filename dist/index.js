@@ -52,6 +52,8 @@ try {
         { meteor: '2.3.2', node: '14.17.3' },
         { meteor: '2.3', node: '14.17.1' },
         { meteor: '2.2.1', node: '12.22.2' },
+        { meteor: '2.2', node: '12.22.1' },
+        { meteor: '2.1', node: '12.22.1' },
         { meteor: '2.0', node: '12.22.1' },
         { meteor: '1.12', node: '12.22.1' },
         { meteor: '1.11', node: '12.22.1' },

@@ -21,7 +21,19 @@ try {
   const METEOR_VERSION = release;
 
   // https://github.com/disney/meteor-base/blob/master/test.sh#L59
-  const NODE_VERSION = METEOR_VERSION.match(/^1\.[678]\./) ? '8' : '12';
+  const NODE_VERSION =
+    [
+      { meteor: '2.3', node: '14.17.1' },
+      { meteor: '2.2.1', node: '12.22.2' },
+      { meteor: '2.0', node: '12.22.1' },
+      { meteor: '1.12', node: '12.22.1' },
+      { meteor: '1.11', node: '12.22.1' },
+      { meteor: '1.10', node: '12.22.1' },
+      { meteor: '1.9', node: '12.22.1' },
+      { meteor: '1.8', node: '8.17.0' },
+      { meteor: '1.7', node: '8.17.0' },
+      { meteor: '1.6', node: '8.17.0' },
+    ].find((conf) => METEOR_VERSION.startsWith(conf.meteor))?.node || '14.17.3';
 
   const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
   const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';

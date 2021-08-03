@@ -49,6 +49,7 @@ try {
     const METEOR_VERSION = release;
     // https://github.com/disney/meteor-base/blob/master/test.sh#L59
     const NODE_VERSION = ((_a = [
+        { meteor: '2.3.2', node: '14.17.3' },
         { meteor: '2.3', node: '14.17.1' },
         { meteor: '2.2.1', node: '12.22.2' },
         { meteor: '2.0', node: '12.22.1' },

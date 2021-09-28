@@ -49,7 +49,12 @@ try {
     const METEOR_VERSION = release;
     // https://github.com/disney/meteor-base/blob/master/test.sh#L59
     const NODE_VERSION = ((_a = [
+        { meteor: '2.3.6', node: '14.17.6' },
+        { meteor: '2.3.5', node: '14.17.5' },
+        { meteor: '2.3.4', node: '14.17.4' },
+        { meteor: '2.3.3', node: '14.17.4' },
         { meteor: '2.3.2', node: '14.17.3' },
+        { meteor: '2.3.1', node: '14.17.3' },
         { meteor: '2.3', node: '14.17.1' },
         { meteor: '2.2.1', node: '12.22.2' },
         { meteor: '2.2', node: '12.22.1' },
@@ -62,10 +67,11 @@ try {
         { meteor: '1.8', node: '8.17.0' },
         { meteor: '1.7', node: '8.17.0' },
         { meteor: '1.6', node: '8.17.0' },
-    ].find((conf) => METEOR_VERSION.startsWith(conf.meteor))) === null || _a === void 0 ? void 0 : _a.node) || '14.17.3';
+    ].find((conf) => METEOR_VERSION.startsWith(conf.meteor))) === null || _a === void 0 ? void 0 : _a.node) || '14.17.6';
     const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
     const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';
     const EXTRA_PACKAGES = '${EXTRA_PACKAGES}';
+    const EXTRA_COMMANDS = '${EXTRA_COMMANDS}';
     const TEMPLATE = `FROM geoffreybooth/meteor-base:${METEOR_VERSION} as builder
 ARG NPM_PACKAGE_TOKEN
 ARG METEOR_PACKAGE_DIRS
@@ -83,6 +89,7 @@ RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make pyt
 COPY --from=builder $SCRIPTS_FOLDER $SCRIPTS_FOLDER/
 COPY --from=builder $APP_BUNDLE_FOLDER/bundle $APP_BUNDLE_FOLDER/bundle
 RUN bash $SCRIPTS_FOLDER/build-meteor-npm-dependencies.sh && apk del .node-gyp-compilation-dependencies
+${EXTRA_COMMANDS}
 ENTRYPOINT ["/docker/entrypoint.sh"]
 CMD ["node", "main.js"]
 EXPOSE 3000`;

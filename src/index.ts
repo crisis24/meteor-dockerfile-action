@@ -46,6 +46,7 @@ try {
   const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
   const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';
   const EXTRA_PACKAGES = '${EXTRA_PACKAGES}';
+  const EXTRA_COMMANDS = '${EXTRA_COMMANDS}';
 
   const TEMPLATE = `FROM geoffreybooth/meteor-base:${METEOR_VERSION} as builder
 ARG NPM_PACKAGE_TOKEN
@@ -64,6 +65,7 @@ RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make pyt
 COPY --from=builder $SCRIPTS_FOLDER $SCRIPTS_FOLDER/
 COPY --from=builder $APP_BUNDLE_FOLDER/bundle $APP_BUNDLE_FOLDER/bundle
 RUN bash $SCRIPTS_FOLDER/build-meteor-npm-dependencies.sh && apk del .node-gyp-compilation-dependencies
+${EXTRA_COMMANDS}
 ENTRYPOINT ["/docker/entrypoint.sh"]
 CMD ["node", "main.js"]
 EXPOSE 3000`;

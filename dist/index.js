@@ -26,7 +26,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__webpack_require__(186));
 const fs = __importStar(__webpack_require__(747));
@@ -42,14 +41,14 @@ try {
             throw new Error('Meteor version missing');
         }
         const releaseFile_ = '' + fs.readFileSync(releaseFile);
-        const m = releaseFile_.match(/^METEOR@([\d\.]+)/);
+        const m = releaseFile_.match(/^METEOR@([\d.]+)/);
         if (m && m[1])
             release = m && m[1];
     }
     const METEOR_VERSION = release;
     // https://github.com/disney/meteor-base/blob/master/test.sh#L59
-    const NODE_VERSION = ((_a = [
-        { meteor: '2.3.6', node: '14.17.6' },
+    const match = [
+        { meteor: '2.3.6', node: '14.17.6', alpine: '3.14', python: 'python3' },
         { meteor: '2.3.5', node: '14.17.5' },
         { meteor: '2.3.4', node: '14.17.4' },
         { meteor: '2.3.3', node: '14.17.4' },
@@ -67,7 +66,9 @@ try {
         { meteor: '1.8', node: '8.17.0' },
         { meteor: '1.7', node: '8.17.0' },
         { meteor: '1.6', node: '8.17.0' },
-    ].find((conf) => METEOR_VERSION.startsWith(conf.meteor))) === null || _a === void 0 ? void 0 : _a.node) || '14.17.6';
+    ].find((conf) => METEOR_VERSION.startsWith(conf.meteor));
+    const NODE_IMAGE = (match && `${match.node}-alpine${match.alpine || ''}`) || '14.17.6-alpine3.14';
+    const PYTHON_PACKAGE = (match === null || match === void 0 ? void 0 : match.python) || 'python';
     const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
     const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';
     const EXTRA_PACKAGES = '${EXTRA_PACKAGES}';
@@ -80,11 +81,11 @@ RUN echo "//npm.pkg.github.com/:_authToken=${NPM_PACKAGE_TOKEN}" > ~/.npmrc && b
 COPY . $APP_SOURCE_FOLDER/
 RUN bash $SCRIPTS_FOLDER/build-meteor-bundle.sh
 
-FROM node:${NODE_VERSION}-alpine
+FROM node:${NODE_IMAGE}
 ARG EXTRA_PACKAGES
 ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker
-RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make python && apk --no-cache add bash ca-certificates ${EXTRA_PACKAGES}
+RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make ${PYTHON_PACKAGE} && apk --no-cache add bash ca-certificates ${EXTRA_PACKAGES}
 COPY --from=builder $SCRIPTS_FOLDER $SCRIPTS_FOLDER/
 COPY --from=builder $APP_BUNDLE_FOLDER/bundle $APP_BUNDLE_FOLDER/bundle
 RUN bash $SCRIPTS_FOLDER/build-meteor-npm-dependencies.sh && apk del .node-gyp-compilation-dependencies
@@ -92,7 +93,7 @@ ENTRYPOINT ["/docker/entrypoint.sh"]
 CMD ["node", "main.js"]
 EXPOSE 3000`;
     core.info(`METEOR_VERSION = ${METEOR_VERSION}`);
-    core.info(`NODE_VERSION = ${NODE_VERSION}`);
+    core.info(`NODE_VERSION = ${NODE_IMAGE}`);
     core.info(``);
     core.info(TEMPLATE);
     fs.writeFileSync(dockerFile, TEMPLATE);

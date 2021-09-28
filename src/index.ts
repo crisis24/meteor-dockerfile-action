@@ -22,6 +22,7 @@ try {
 
   // https://github.com/disney/meteor-base/blob/master/test.sh#L59
   const match = [
+    { meteor: '2.4', node: '14.17.6', alpine: '3.14', python: 'python3' },
     { meteor: '2.3.6', node: '14.17.6', alpine: '3.14', python: 'python3' },
     { meteor: '2.3.5', node: '14.17.5' },
     { meteor: '2.3.4', node: '14.17.4' },

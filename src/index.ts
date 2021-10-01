@@ -22,8 +22,8 @@ try {
 
   // https://github.com/disney/meteor-base/blob/master/test.sh#L59
   const match = [
-    { meteor: '2.4', node: '14.17.6', alpine: '3.14', python: 'python3' },
-    { meteor: '2.3.6', node: '14.17.6', alpine: '3.14', python: 'python3' },
+    { meteor: '2.4', node: '14.17.6' },
+    { meteor: '2.3.6', node: '14.17.6' },
     { meteor: '2.3.5', node: '14.17.5' },
     { meteor: '2.3.4', node: '14.17.4' },
     { meteor: '2.3.3', node: '14.17.4' },
@@ -42,8 +42,8 @@ try {
     { meteor: '1.7', node: '8.17.0' },
     { meteor: '1.6', node: '8.17.0' },
   ].find((conf) => METEOR_VERSION.startsWith(conf.meteor));
-  const NODE_IMAGE = (match && `${match.node}-alpine${match.alpine || ''}`) || '14.17.6-alpine3.14';
-  const PYTHON_PACKAGE = match?.python || 'python';
+  const NODE_IMAGE = (match && `${match.node}-alpine`) || '14.17.6-alpine';
+  const PYTHON_PACKAGE = 'python';
 
   const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
   const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';

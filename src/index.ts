@@ -43,7 +43,7 @@ try {
     { meteor: '1.6', node: '8.17.0' },
   ].find((conf) => METEOR_VERSION.startsWith(conf.meteor));
   const NODE_IMAGE = (match && `${match.node}-alpine`) || '14.17.6-alpine';
-  const PYTHON_PACKAGE = 'python';
+  const PYTHON_PACKAGE = 'python2';
 
   const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
   const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';

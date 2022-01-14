@@ -44,8 +44,8 @@ try {
   }
 
   const METEOR_VERSION = release;
-  const match = nodeVersions.find((conf) => METEOR_VERSION.startsWith(conf.meteor));
-  const NODE_IMAGE = (match && `${match.node}-alpine`) || nodeVersions[0].node;
+  const match = nodeVersions.find((conf) => METEOR_VERSION.startsWith(conf.meteor)) || nodeVersions[0];
+  const NODE_IMAGE = `${match.node}-alpine`;
   const PYTHON_PACKAGE = 'python';
 
   const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';

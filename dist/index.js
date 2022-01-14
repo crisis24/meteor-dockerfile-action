@@ -73,7 +73,6 @@ try {
     const match = nodeVersions.find((conf) => METEOR_VERSION.startsWith(conf.meteor)) || nodeVersions[0];
     const DOCKER_ACCOUNT = match.docker;
     const NODE_IMAGE = `${match.node}-alpine`;
-    const PYTHON_PACKAGE = 'python';
     const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
     const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';
     const EXTRA_PACKAGES = '${EXTRA_PACKAGES}';
@@ -90,7 +89,7 @@ FROM node:${NODE_IMAGE}
 ARG EXTRA_PACKAGES
 ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker
-RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make ${PYTHON_PACKAGE} && apk --no-cache add bash ca-certificates ${EXTRA_PACKAGES}
+RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make python3 && apk --no-cache add bash ca-certificates ${EXTRA_PACKAGES}
 COPY --from=builder $SCRIPTS_FOLDER $SCRIPTS_FOLDER/
 COPY --from=builder $APP_BUNDLE_FOLDER/bundle $APP_BUNDLE_FOLDER/bundle
 RUN bash $SCRIPTS_FOLDER/build-meteor-npm-dependencies.sh && apk del .node-gyp-compilation-dependencies

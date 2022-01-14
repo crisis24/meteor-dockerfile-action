@@ -29,30 +29,30 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const fs = __importStar(__nccwpck_require__(147));
 const nodeVersions = [
-    { meteor: '2.5.3', node: '14.18.2' },
-    { meteor: '2.5.2', node: '14.18.2' },
-    { meteor: '2.5.1', node: '14.17.6' },
-    { meteor: '2.5', node: '14.17.6' },
-    { meteor: '2.4.1', node: '14.17.6' },
-    { meteor: '2.4', node: '14.17.6' },
-    { meteor: '2.3.6', node: '14.17.6' },
-    { meteor: '2.3.5', node: '14.17.5' },
-    { meteor: '2.3.4', node: '14.17.4' },
-    { meteor: '2.3.3', node: '14.17.4' },
-    { meteor: '2.3.2', node: '14.17.3' },
-    { meteor: '2.3.1', node: '14.17.3' },
-    { meteor: '2.3', node: '14.17.1' },
-    { meteor: '2.2.1', node: '12.22.2' },
-    { meteor: '2.2', node: '12.22.1' },
-    { meteor: '2.1', node: '12.22.1' },
-    { meteor: '2.0', node: '12.22.1' },
-    { meteor: '1.12', node: '12.22.1' },
-    { meteor: '1.11', node: '12.22.1' },
-    { meteor: '1.10', node: '12.22.1' },
-    { meteor: '1.9', node: '12.22.1' },
-    { meteor: '1.8', node: '8.17.0' },
-    { meteor: '1.7', node: '8.17.0' },
-    { meteor: '1.6', node: '8.17.0' },
+    { meteor: '2.5.3', node: '14.18.2', docker: 'crisis24' },
+    { meteor: '2.5.2', node: '14.18.2', docker: 'geoffreybooth' },
+    { meteor: '2.5.1', node: '14.17.6', docker: 'geoffreybooth' },
+    { meteor: '2.5', node: '14.17.6', docker: 'geoffreybooth' },
+    { meteor: '2.4.1', node: '14.17.6', docker: 'geoffreybooth' },
+    { meteor: '2.4', node: '14.17.6', docker: 'geoffreybooth' },
+    { meteor: '2.3.6', node: '14.17.6', docker: 'geoffreybooth' },
+    { meteor: '2.3.5', node: '14.17.5', docker: 'geoffreybooth' },
+    { meteor: '2.3.4', node: '14.17.4', docker: 'geoffreybooth' },
+    { meteor: '2.3.3', node: '14.17.4', docker: 'geoffreybooth' },
+    { meteor: '2.3.2', node: '14.17.3', docker: 'geoffreybooth' },
+    { meteor: '2.3.1', node: '14.17.3', docker: 'geoffreybooth' },
+    { meteor: '2.3', node: '14.17.1', docker: 'geoffreybooth' },
+    { meteor: '2.2.1', node: '12.22.2', docker: 'geoffreybooth' },
+    { meteor: '2.2', node: '12.22.1', docker: 'geoffreybooth' },
+    { meteor: '2.1', node: '12.22.1', docker: 'geoffreybooth' },
+    { meteor: '2.0', node: '12.22.1', docker: 'geoffreybooth' },
+    { meteor: '1.12', node: '12.22.1', docker: 'geoffreybooth' },
+    { meteor: '1.11', node: '12.22.1', docker: 'geoffreybooth' },
+    { meteor: '1.10', node: '12.22.1', docker: 'geoffreybooth' },
+    { meteor: '1.9', node: '12.22.1', docker: 'geoffreybooth' },
+    { meteor: '1.8', node: '8.17.0', docker: 'geoffreybooth' },
+    { meteor: '1.7', node: '8.17.0', docker: 'geoffreybooth' },
+    { meteor: '1.6', node: '8.17.0', docker: 'geoffreybooth' },
 ];
 try {
     const dockerFile = core.getInput('docker-file');
@@ -71,12 +71,13 @@ try {
     }
     const METEOR_VERSION = release;
     const match = nodeVersions.find((conf) => METEOR_VERSION.startsWith(conf.meteor)) || nodeVersions[0];
+    const DOCKER_ACCOUNT = match.docker;
     const NODE_IMAGE = `${match.node}-alpine`;
     const PYTHON_PACKAGE = 'python';
     const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
     const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';
     const EXTRA_PACKAGES = '${EXTRA_PACKAGES}';
-    const TEMPLATE = `FROM geoffreybooth/meteor-base:${METEOR_VERSION} as builder
+    const TEMPLATE = `FROM ${DOCKER_ACCOUNT}/meteor-base:${METEOR_VERSION} as builder
 ARG NPM_PACKAGE_TOKEN
 ARG METEOR_PACKAGE_DIRS
 ENV METEOR_PACKAGE_DIRS=${METEOR_PACKAGE_DIRS}

@@ -2,9 +2,8 @@ import * as core from '@actions/core';
 import * as fs from 'fs';
 
 const nodeVersions = [
+  { meteor: '2.5.6', node: '14.18.2', docker: 'geoffreybooth' },
   { meteor: '2.5.3', node: '14.18.2', docker: 'crisis24' },
-  { meteor: '2.5.2', node: '14.18.2', docker: 'geoffreybooth' },
-  { meteor: '2.5.1', node: '14.17.6', docker: 'geoffreybooth' },
   { meteor: '2.5', node: '14.17.6', docker: 'geoffreybooth' },
   { meteor: '2.4.1', node: '14.17.6', docker: 'geoffreybooth' },
   { meteor: '2.4', node: '14.17.6', docker: 'geoffreybooth' },
@@ -65,6 +64,7 @@ FROM node:${NODE_IMAGE}
 ARG EXTRA_PACKAGES
 ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker
+ENV NODE_ENV production
 RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make python3 && apk --no-cache add bash ca-certificates ${EXTRA_PACKAGES}
 COPY --from=builder $SCRIPTS_FOLDER $SCRIPTS_FOLDER/
 COPY --from=builder $APP_BUNDLE_FOLDER/bundle $APP_BUNDLE_FOLDER/bundle

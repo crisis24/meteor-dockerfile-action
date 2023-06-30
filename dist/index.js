@@ -29,6 +29,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const fs = __importStar(__nccwpck_require__(147));
 const nodeVersions = [
+    { meteor: '2.12', node: '14.21.3', docker: 'geoffreybooth' },
+    { meteor: '2.11.0', node: '14.21.3', docker: 'geoffreybooth' },
     { meteor: '2.10.0', node: '14.21.2', docker: 'geoffreybooth' },
     { meteor: '2.9.0', node: '14.21.1', docker: 'geoffreybooth' },
     { meteor: '2.8.1', node: '14.21.1', docker: 'geoffreybooth' },

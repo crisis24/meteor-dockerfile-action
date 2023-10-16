@@ -2,9 +2,9 @@ import * as core from '@actions/core';
 import * as fs from 'fs';
 
 const nodeVersions = [
-  { meteor: '2.13.3', node: '14.21.4', docker: 'geoffreybooth' },
-  { meteor: '2.13.1', node: '14.21.4', docker: 'geoffreybooth' },
-  { meteor: '2.13', node: '14.21.4', docker: 'geoffreybooth' },
+  { meteor: '2.13.3', node: '14.21.3', docker: 'geoffreybooth' },
+  { meteor: '2.13.1', node: '14.21.3', docker: 'geoffreybooth' },
+  { meteor: '2.13', node: '14.21.3', docker: 'geoffreybooth' },
   { meteor: '2.12', node: '14.21.3', docker: 'geoffreybooth' },
   { meteor: '2.11.0', node: '14.21.3', docker: 'geoffreybooth' },
   { meteor: '2.10.0', node: '14.21.2', docker: 'geoffreybooth' },

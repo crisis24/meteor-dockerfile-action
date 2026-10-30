@@ -66,11 +66,20 @@ try {
   const DOCKER_ACCOUNT = match.docker;
   const NODE_IMAGE = `${match.node}-alpine`;
 
+  const PATCH_IMAGE = core.getInput('node-patch-image').replace(/\{node\}/g, match.node);
+  core.debug(`node-patch-image: ${PATCH_IMAGE}`);
+  const PATCH_STAGE = PATCH_IMAGE ? `FROM ${PATCH_IMAGE} AS node-patched\n\n` : '';
+  const PATCH_COPY = PATCH_IMAGE
+    ? `COPY --from=node-patched /node /usr/local/bin/node
+RUN test "$(node -p process.versions.node)" = "${match.node}"
+`
+    : '';
+
   const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
   const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';
   const EXTRA_PACKAGES = '${EXTRA_PACKAGES}';
 
-  const TEMPLATE = `FROM ${DOCKER_ACCOUNT}/meteor-base:${METEOR_VERSION} as builder
+  const TEMPLATE = `${PATCH_STAGE}FROM ${DOCKER_ACCOUNT}/meteor-base:${METEOR_VERSION} as builder
 ARG NPM_PACKAGE_TOKEN
 ARG METEOR_PACKAGE_DIRS
 ENV METEOR_PACKAGE_DIRS=${METEOR_PACKAGE_DIRS}
@@ -81,7 +90,7 @@ RUN bash $SCRIPTS_FOLDER/build-meteor-bundle.sh
 
 FROM node:${NODE_IMAGE}
 ARG EXTRA_PACKAGES
-ENV APP_BUNDLE_FOLDER /opt/bundle
+${PATCH_COPY}ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker
 ENV NODE_ENV production
 RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make python3 && apk --no-cache add bash ca-certificates ${EXTRA_PACKAGES}
@@ -94,6 +103,7 @@ EXPOSE 3000`;
 
   core.info(`METEOR_VERSION = ${METEOR_VERSION}`);
   core.info(`NODE_VERSION = ${NODE_IMAGE}`);
+  core.info(`NODE_PATCH_IMAGE = ${PATCH_IMAGE || 'none'}`);
   core.info(``);
   core.info(TEMPLATE);
 

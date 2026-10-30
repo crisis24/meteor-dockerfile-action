@@ -17,6 +17,9 @@ inputs:
     description: 'Image providing a patched node binary at /node, e.g. registry.example.com/org/node:{node}-alpine-patched. {node} is replaced by the resolved Node version. Empty = no patch.'
     required: false
     default: ''
+branding:
+  icon: package
+  color: blue
 runs:
   using: 'node24'
   main: 'dist/index.js'

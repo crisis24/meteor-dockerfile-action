@@ -4,43 +4,18 @@
   "description": "Compile multistage Meteor Dockerfile",
   "main": "lib/index.js",
   "scripts": {
-    "build": "tsc && ncc build --source-map"
+    "build": "tsc && ncc build --source-map",
+    "lint": "biome check src",
+    "format": "biome check --write src"
   },
   "dependencies": {
-    "@actions/core": "1.10.0",
-    "@actions/github": "5.1.1"
+    "@actions/core": "3.0.1",
+    "@actions/github": "9.1.1"
   },
   "devDependencies": {
-    "@types/node": "20.3.2",
-    "@typescript-eslint/eslint-plugin": "5.60.1",
-    "@typescript-eslint/parser": "5.60.1",
-    "@vercel/ncc": "0.36.1",
-    "eslint": "8.43.0",
-    "eslint-config-prettier": "8.8.0",
-    "eslint-plugin-prettier": "4.2.1",
-    "prettier": "2.8.8",
-    "typescript": "5.1.6"
-  },
-  "prettier": {
-    "semi": true,
-    "trailingComma": "all",
-    "singleQuote": true,
-    "printWidth": 120,
-    "tabWidth": 2,
-    "endOfLine": "auto"
-  },
-  "eslintConfig": {
-    "parser": "@typescript-eslint/parser",
-    "extends": [
-      "plugin:@typescript-eslint/recommended",
-      "plugin:prettier/recommended"
-    ],
-    "parserOptions": {
-      "ecmaVersion": 2018,
-      "sourceType": "module"
-    },
-    "rules": {
-      "@typescript-eslint/no-use-before-define": "off"
-    }
+    "@biomejs/biome": "2.6.4",
+    "@types/node": "26.6.6",
+    "@vercel/ncc": "0.45.0",
+    "typescript": "6.0.3"
   }
 }

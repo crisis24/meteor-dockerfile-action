@@ -1,5 +1,9 @@
 import * as core from '@actions/core';
+import { X509Certificate } from 'crypto';
 import * as fs from 'fs';
+import * as path from 'path';
+
+const CA_TARGET = '/etc/ssl/extra/ca.pem';
 
 const nodeVersions = [
   { meteor: '2.16', node: '14.21.3', docker: 'geoffreybooth' },
@@ -75,6 +79,39 @@ RUN test "$(node -p process.versions.node)" = "${match.node}"
 `
     : '';
 
+  const CA_CERT = core.getInput('ca-cert').trim();
+  core.debug(`ca-cert: ${CA_CERT}`);
+  let CA_COPY = '';
+  if (CA_CERT) {
+    const contextRoot = fs.realpathSync(path.resolve(core.getInput('context').trim() || '.'));
+    const source = path.posix.normalize(CA_CERT.replace(/\\/g, '/'));
+    if (path.posix.isAbsolute(source) || source === '..' || source.startsWith('../'))
+      throw new Error(`ca-cert must be a path inside the build context: ${CA_CERT}`);
+    const file = path.join(contextRoot, source);
+    if (!fs.existsSync(file) || !fs.statSync(file).isFile()) throw new Error(`ca-cert file not found: ${file}`);
+    const realFile = fs.realpathSync(file);
+    if (realFile !== contextRoot && !realFile.startsWith(contextRoot + path.sep))
+      throw new Error(`ca-cert resolves outside the build context: ${CA_CERT}`);
+    const pem = fs.readFileSync(realFile, 'utf8');
+    if (/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(pem))
+      throw new Error(`ca-cert must not contain a private key: ${CA_CERT}`);
+    const blocks = pem.match(/-----BEGIN CERTIFICATE-----[^-]*-----END CERTIFICATE-----/g) || [];
+    const begins = pem.split('-----BEGIN CERTIFICATE-----').length - 1;
+    const ends = pem.split('-----END CERTIFICATE-----').length - 1;
+    if (blocks.length === 0 || blocks.length !== begins || blocks.length !== ends)
+      throw new Error(`ca-cert is not a valid PEM certificate file: ${CA_CERT}`);
+    for (const block of blocks) {
+      try {
+        new X509Certificate(block);
+      } catch (e) {
+        throw new Error(`ca-cert contains an invalid certificate: ${CA_CERT}: ${e instanceof Error ? e.message : e}`);
+      }
+    }
+    CA_COPY = `COPY ${JSON.stringify([source, CA_TARGET])}
+ENV NODE_EXTRA_CA_CERTS=${CA_TARGET}
+`;
+  }
+
   const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
   const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';
   const EXTRA_PACKAGES = '${EXTRA_PACKAGES}';
@@ -90,7 +127,7 @@ RUN bash $SCRIPTS_FOLDER/build-meteor-bundle.sh
 
 FROM node:${NODE_IMAGE}
 ARG EXTRA_PACKAGES
-${PATCH_COPY}ENV APP_BUNDLE_FOLDER /opt/bundle
+${PATCH_COPY}${CA_COPY}ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker
 ENV NODE_ENV production
 RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make python3 && apk --no-cache add bash ca-certificates ${EXTRA_PACKAGES}
@@ -104,6 +141,7 @@ EXPOSE 3000`;
   core.info(`METEOR_VERSION = ${METEOR_VERSION}`);
   core.info(`NODE_VERSION = ${NODE_IMAGE}`);
   core.info(`NODE_PATCH_IMAGE = ${PATCH_IMAGE || 'none'}`);
+  core.info(`CA_CERT = ${CA_CERT || 'none'}`);
   core.info(``);
   core.info(TEMPLATE);
 

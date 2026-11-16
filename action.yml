@@ -17,6 +17,10 @@ inputs:
     description: 'Image providing a patched node binary at /node, e.g. registry.example.com/org/node:{node}-alpine-patched. {node} is replaced by the resolved Node version. Empty = no patch.'
     required: false
     default: ''
+  ca-cert:
+    description: 'Path, relative to the Docker build context, of a PEM file with extra CA certificates to trust. It is copied into the runtime image and exposed to Node.js through NODE_EXTRA_CA_CERTS. Empty = none.'
+    required: false
+    default: ''
 branding:
   icon: package
   color: blue

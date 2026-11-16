@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as fs from 'fs';
+import * as path from 'path';
 
 const nodeVersions = [
   { meteor: '2.16', node: '14.21.3', docker: 'geoffreybooth' },
@@ -75,6 +76,24 @@ RUN test "$(node -p process.versions.node)" = "${match.node}"
 `
     : '';
 
+  const CA_CERT = core.getInput('ca-cert').trim();
+  core.debug(`ca-cert: ${CA_CERT}`);
+  let CA_COPY = '';
+  if (CA_CERT) {
+    const normalized = path.posix.normalize(CA_CERT.replace(/\\/g, '/'));
+    if (path.posix.isAbsolute(normalized) || normalized === '..' || normalized.startsWith('../'))
+      throw new Error(`ca-cert must be a path inside the build context: ${CA_CERT}`);
+    if (!fs.existsSync(normalized)) throw new Error(`ca-cert file not found: ${CA_CERT}`);
+    const pem = fs.readFileSync(normalized, 'utf8');
+    if (!pem.includes('-----BEGIN CERTIFICATE-----')) throw new Error(`ca-cert is not a PEM certificate: ${CA_CERT}`);
+    if (/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(pem))
+      throw new Error(`ca-cert must not contain a private key: ${CA_CERT}`);
+    const target = `/etc/ssl/extra/${path.posix.basename(normalized)}`;
+    CA_COPY = `COPY ${JSON.stringify([normalized, target])}
+ENV NODE_EXTRA_CA_CERTS=${target}
+`;
+  }
+
   const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
   const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';
   const EXTRA_PACKAGES = '${EXTRA_PACKAGES}';
@@ -90,7 +109,7 @@ RUN bash $SCRIPTS_FOLDER/build-meteor-bundle.sh
 
 FROM node:${NODE_IMAGE}
 ARG EXTRA_PACKAGES
-${PATCH_COPY}ENV APP_BUNDLE_FOLDER /opt/bundle
+${PATCH_COPY}${CA_COPY}ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker
 ENV NODE_ENV production
 RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make python3 && apk --no-cache add bash ca-certificates ${EXTRA_PACKAGES}
@@ -104,6 +123,7 @@ EXPOSE 3000`;
   core.info(`METEOR_VERSION = ${METEOR_VERSION}`);
   core.info(`NODE_VERSION = ${NODE_IMAGE}`);
   core.info(`NODE_PATCH_IMAGE = ${PATCH_IMAGE || 'none'}`);
+  core.info(`CA_CERT = ${CA_CERT || 'none'}`);
   core.info(``);
   core.info(TEMPLATE);
 

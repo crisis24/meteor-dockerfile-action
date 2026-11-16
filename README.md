@@ -8,6 +8,7 @@ GitHub Action that generates a multistage `Dockerfile` for building a Meteor app
 - uses: org/meteor-dockerfile-action@v2
   with:
     node-patch-image: registry.example.com/org/node:{node}-alpine-patched
+    ca-cert: certs/extra-ca.pem
 ```
 
 ## Inputs
@@ -18,12 +19,19 @@ GitHub Action that generates a multistage `Dockerfile` for building a Meteor app
 | `meteor-release-file` | `./.meteor/release` | Path to the Meteor release file. |
 | `docker-file` | `./Dockerfile` | Path of the generated Dockerfile. |
 | `node-patch-image` | | Image providing a patched `node` binary at `/node`. `{node}` is replaced by the resolved Node.js version. Empty means no patch. |
+| `ca-cert` | | Path of a PEM file with extra CA certificates, relative to the build context. Empty means none. |
 
 ## Patched Node.js
 
 When `node-patch-image` is set, the generated Dockerfile adds a stage from that image and copies its `/node` over `/usr/local/bin/node` in the runtime stage. A `RUN test` line fails the build if the binary's version differs from the one resolved from the Meteor version.
 
 The image must exist for every resolved Node.js version, otherwise the build fails on the missing tag. Use a fixed tag instead of `{node}` to pin a single image.
+
+## Extra CA certificates
+
+When `ca-cert` is set, the generated Dockerfile copies that file to `/etc/ssl/extra/<name>` in the runtime stage and sets `NODE_EXTRA_CA_CERTS` to it. Node.js then trusts those roots in addition to its bundled store, which fixes `self signed certificate in certificate chain` errors against hosts whose root CA is newer than the Node.js release (typical for end-of-life Node.js). To trust several CAs, concatenate them in one PEM file.
+
+The path must stay inside the build context (no absolute path, no `..`), the file must exist, contain a certificate, and no private key, otherwise the action fails. Commit only public certificates.
 
 ## Development
 

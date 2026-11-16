@@ -31677,6 +31677,7 @@ function getIDToken(aud) {
 ;// CONCATENATED MODULE: ./lib/index.js
 
 
+
 const nodeVersions = [
     { meteor: '2.16', node: '14.21.3', docker: 'geoffreybooth' },
     { meteor: '2.15', node: '14.21.3', docker: 'geoffreybooth' },
@@ -31748,6 +31749,25 @@ try {
 RUN test "$(node -p process.versions.node)" = "${match.node}"
 `
         : '';
+    const CA_CERT = getInput('ca-cert').trim();
+    core_debug(`ca-cert: ${CA_CERT}`);
+    let CA_COPY = '';
+    if (CA_CERT) {
+        const normalized = external_path_namespaceObject.posix.normalize(CA_CERT.replace(/\\/g, '/'));
+        if (external_path_namespaceObject.posix.isAbsolute(normalized) || normalized === '..' || normalized.startsWith('../'))
+            throw new Error(`ca-cert must be a path inside the build context: ${CA_CERT}`);
+        if (!external_fs_namespaceObject.existsSync(normalized))
+            throw new Error(`ca-cert file not found: ${CA_CERT}`);
+        const pem = external_fs_namespaceObject.readFileSync(normalized, 'utf8');
+        if (!pem.includes('-----BEGIN CERTIFICATE-----'))
+            throw new Error(`ca-cert is not a PEM certificate: ${CA_CERT}`);
+        if (/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(pem))
+            throw new Error(`ca-cert must not contain a private key: ${CA_CERT}`);
+        const target = `/etc/ssl/extra/${external_path_namespaceObject.posix.basename(normalized)}`;
+        CA_COPY = `COPY ${JSON.stringify([normalized, target])}
+ENV NODE_EXTRA_CA_CERTS=${target}
+`;
+    }
     const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
     const METEOR_PACKAGE_DIRS = '${METEOR_PACKAGE_DIRS}';
     const EXTRA_PACKAGES = '${EXTRA_PACKAGES}';
@@ -31762,7 +31782,7 @@ RUN bash $SCRIPTS_FOLDER/build-meteor-bundle.sh
 
 FROM node:${NODE_IMAGE}
 ARG EXTRA_PACKAGES
-${PATCH_COPY}ENV APP_BUNDLE_FOLDER /opt/bundle
+${PATCH_COPY}${CA_COPY}ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker
 ENV NODE_ENV production
 RUN apk --no-cache --virtual .node-gyp-compilation-dependencies add g++ make python3 && apk --no-cache add bash ca-certificates ${EXTRA_PACKAGES}
@@ -31775,6 +31795,7 @@ EXPOSE 3000`;
     info(`METEOR_VERSION = ${METEOR_VERSION}`);
     info(`NODE_VERSION = ${NODE_IMAGE}`);
     info(`NODE_PATCH_IMAGE = ${PATCH_IMAGE || 'none'}`);
+    info(`CA_CERT = ${CA_CERT || 'none'}`);
     info(``);
     info(TEMPLATE);
     external_fs_namespaceObject.writeFileSync(dockerFile, TEMPLATE);

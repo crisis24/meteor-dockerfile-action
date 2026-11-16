@@ -19,6 +19,7 @@ GitHub Action that generates a multistage `Dockerfile` for building a Meteor app
 | `meteor-release-file` | `./.meteor/release` | Path to the Meteor release file. |
 | `docker-file` | `./Dockerfile` | Path of the generated Dockerfile. |
 | `node-patch-image` | | Image providing a patched `node` binary at `/node`. `{node}` is replaced by the resolved Node.js version. Empty means no patch. |
+| `context` | `.` | Docker build context directory. `ca-cert` is resolved against it, so it must match the `context` of your `docker build`. |
 | `ca-cert` | | Path of a PEM file with extra CA certificates, relative to the build context. Empty means none. |
 
 ## Patched Node.js
@@ -29,9 +30,9 @@ The image must exist for every resolved Node.js version, otherwise the build fai
 
 ## Extra CA certificates
 
-When `ca-cert` is set, the generated Dockerfile copies that file to `/etc/ssl/extra/<name>` in the runtime stage and sets `NODE_EXTRA_CA_CERTS` to it. Node.js then trusts those roots in addition to its bundled store, which fixes `self signed certificate in certificate chain` errors against hosts whose root CA is newer than the Node.js release (typical for end-of-life Node.js). To trust several CAs, concatenate them in one PEM file.
+When `ca-cert` is set, the generated Dockerfile copies that file to `/etc/ssl/extra/ca.pem` in the runtime stage and sets `NODE_EXTRA_CA_CERTS` to it. Node.js then trusts those roots in addition to its bundled store, which fixes `self signed certificate in certificate chain` errors against hosts whose root CA is newer than the Node.js release (typical for end-of-life Node.js). To trust several CAs, concatenate them in one PEM file.
 
-The path must stay inside the build context (no absolute path, no `..`), the file must exist, contain a certificate, and no private key, otherwise the action fails. Commit only public certificates.
+The path is relative to `context` and must stay inside it (no absolute path, no `..`, no symlink escaping it). Every certificate in the file must parse as a valid PEM certificate, and the file must not contain a private key, otherwise the action fails. The destination in the image is fixed, whatever the file is called. Commit only public certificates.
 
 ## Development
 

@@ -21,6 +21,10 @@ inputs:
     description: 'Path, relative to the Docker build context, of a PEM file with extra CA certificates to trust. It is copied into the runtime image and exposed to Node.js through NODE_EXTRA_CA_CERTS. Empty = none.'
     required: false
     default: ''
+  context:
+    description: 'Docker build context directory, relative to the workspace. Used to resolve and validate ca-cert; must match the context of the docker build.'
+    required: false
+    default: '.'
 branding:
   icon: package
   color: blue

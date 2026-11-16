@@ -31678,6 +31678,8 @@ function getIDToken(aud) {
 
 
 
+
+const CA_TARGET = '/etc/ssl/extra/ca.pem';
 const nodeVersions = [
     { meteor: '2.16', node: '14.21.3', docker: 'geoffreybooth' },
     { meteor: '2.15', node: '14.21.3', docker: 'geoffreybooth' },
@@ -31753,19 +31755,34 @@ RUN test "$(node -p process.versions.node)" = "${match.node}"
     core_debug(`ca-cert: ${CA_CERT}`);
     let CA_COPY = '';
     if (CA_CERT) {
-        const normalized = external_path_namespaceObject.posix.normalize(CA_CERT.replace(/\\/g, '/'));
-        if (external_path_namespaceObject.posix.isAbsolute(normalized) || normalized === '..' || normalized.startsWith('../'))
+        const contextRoot = external_fs_namespaceObject.realpathSync(external_path_namespaceObject.resolve(getInput('context').trim() || '.'));
+        const source = external_path_namespaceObject.posix.normalize(CA_CERT.replace(/\\/g, '/'));
+        if (external_path_namespaceObject.posix.isAbsolute(source) || source === '..' || source.startsWith('../'))
             throw new Error(`ca-cert must be a path inside the build context: ${CA_CERT}`);
-        if (!external_fs_namespaceObject.existsSync(normalized))
-            throw new Error(`ca-cert file not found: ${CA_CERT}`);
-        const pem = external_fs_namespaceObject.readFileSync(normalized, 'utf8');
-        if (!pem.includes('-----BEGIN CERTIFICATE-----'))
-            throw new Error(`ca-cert is not a PEM certificate: ${CA_CERT}`);
+        const file = external_path_namespaceObject.join(contextRoot, source);
+        if (!external_fs_namespaceObject.existsSync(file) || !external_fs_namespaceObject.statSync(file).isFile())
+            throw new Error(`ca-cert file not found: ${file}`);
+        const realFile = external_fs_namespaceObject.realpathSync(file);
+        if (realFile !== contextRoot && !realFile.startsWith(contextRoot + external_path_namespaceObject.sep))
+            throw new Error(`ca-cert resolves outside the build context: ${CA_CERT}`);
+        const pem = external_fs_namespaceObject.readFileSync(realFile, 'utf8');
         if (/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(pem))
             throw new Error(`ca-cert must not contain a private key: ${CA_CERT}`);
-        const target = `/etc/ssl/extra/${external_path_namespaceObject.posix.basename(normalized)}`;
-        CA_COPY = `COPY ${JSON.stringify([normalized, target])}
-ENV NODE_EXTRA_CA_CERTS=${target}
+        const blocks = pem.match(/-----BEGIN CERTIFICATE-----[^-]*-----END CERTIFICATE-----/g) || [];
+        const begins = pem.split('-----BEGIN CERTIFICATE-----').length - 1;
+        const ends = pem.split('-----END CERTIFICATE-----').length - 1;
+        if (blocks.length === 0 || blocks.length !== begins || blocks.length !== ends)
+            throw new Error(`ca-cert is not a valid PEM certificate file: ${CA_CERT}`);
+        for (const block of blocks) {
+            try {
+                new external_crypto_namespaceObject.X509Certificate(block);
+            }
+            catch (e) {
+                throw new Error(`ca-cert contains an invalid certificate: ${CA_CERT}: ${e instanceof Error ? e.message : e}`);
+            }
+        }
+        CA_COPY = `COPY ${JSON.stringify([source, CA_TARGET])}
+ENV NODE_EXTRA_CA_CERTS=${CA_TARGET}
 `;
     }
     const NPM_PACKAGE_TOKEN = '${NPM_PACKAGE_TOKEN}';
